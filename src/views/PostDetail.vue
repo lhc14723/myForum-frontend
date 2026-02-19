@@ -1,15 +1,24 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '../stores/user'
 import request from '../api/request'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const post = ref(null)
 const loading = ref(true)
 const error = ref('')
 
+// 检查是否是作者
+const isAuthor = computed(() => {
+  return userStore.isLoggedIn && 
+         userStore.userInfo?.id === post.value?.author?.id
+})
+
+// 获取帖子详情
 async function fetchPost() {
   try {
     const res = await request.get(`/posts/${route.params.id}/`)
@@ -21,7 +30,22 @@ async function fetchPost() {
   }
 }
 
-onMounted(fetchPost)
+// ✅ 增加浏览量（无论是否登录，无论是否作者）
+async function incrementViews() {
+  try {
+    // 使用正确的接口格式
+    await request.post(`/posts/${route.params.id}/increment_views/`)
+    console.log('浏览量+1')
+  } catch (err) {
+    // 静默失败，不影响用户体验
+    console.error('增加浏览量失败:', err)
+  }
+}
+
+onMounted(() => {
+  fetchPost()
+  incrementViews()  // 页面加载时调用
+})
 </script>
 
 <template>
@@ -51,12 +75,19 @@ onMounted(fetchPost)
         <span>📝 {{ post.content_length || 0 }} 字</span>
       </div>
       
+      <!-- 作者操作按钮 -->
+      <div v-if="isAuthor" class="author-actions">
+        <button @click="startEdit" class="edit-btn">✏️ 编辑</button>
+        <button @click="deletePost" class="delete-btn">🗑️ 删除</button>
+      </div>
+      
       <button @click="router.push('/')" class="back-btn">← 返回列表</button>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* 样式不变 */
 .post-detail {
   max-width: 800px;
   margin: 0 auto;
@@ -104,6 +135,32 @@ onMounted(fetchPost)
   border-top: 1px solid #eee;
   color: #999;
   font-size: 14px;
+}
+
+.author-actions {
+  margin: 20px 0;
+  padding: 15px 0;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn {
+  padding: 8px 16px;
+  background: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  padding: 8px 16px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .back-btn {

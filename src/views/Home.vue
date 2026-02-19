@@ -8,7 +8,7 @@ const route = useRoute()
 
 // 数据
 const posts = ref([])
-const boards = ref([])  // ✅ 改为从后端获取
+const boards = ref([])
 const loading = ref(false)
 
 // 搜索参数
@@ -39,7 +39,7 @@ async function fetchPosts() {
   }
 }
 
-// ✅ 新增：获取分区列表
+// 获取分区列表
 async function fetchBoards() {
   try {
     const res = await request.get('/boards/')
@@ -60,10 +60,10 @@ function handleSearch() {
 // 切换排序
 function setOrdering(field) {
   const current = params.value.ordering
-  if (current === `-${field}`) {
-    params.value.ordering = field
-  } else {
+  if (current === field) {
     params.value.ordering = `-${field}`
+  } else {
+    params.value.ordering = field
   }
   fetchPosts()
 }
@@ -78,7 +78,7 @@ watch(() => route.query, () => {
 }, { immediate: true })
 
 onMounted(() => {
-  fetchBoards()  // ✅ 获取分区
+  fetchBoards()
 })
 </script>
 
@@ -93,7 +93,6 @@ onMounted(() => {
         class="search-input"
       >
       
-      <!-- ✅ 改为用 boards -->
       <select v-model="params.board" @change="handleSearch" class="section-select">
         <option value="">全部分区</option>
         <option v-for="b in boards" :key="b.id" :value="b.id">
@@ -107,6 +106,8 @@ onMounted(() => {
     <!-- 排序选项 -->
     <div class="sort-bar">
       <span>排序：</span>
+      
+      <!-- 时间排序 -->
       <button 
         :class="{ active: params.ordering.includes('created_at') }"
         @click="setOrdering('created_at')"
@@ -114,13 +115,17 @@ onMounted(() => {
       >
         时间 {{ params.ordering === '-created_at' ? '↓' : '↑' }}
       </button>
+      
+      <!-- ✅ 长度排序：改为 content_len -->
       <button 
-        :class="{ active: params.ordering.includes('content_length') }"
-        @click="setOrdering('content_length')"
+        :class="{ active: params.ordering.includes('content_len') }"
+        @click="setOrdering('content_len')"
         class="sort-btn"
       >
-        长度 {{ params.ordering === '-content_length' ? '↓' : '↑' }}
+        长度 {{ params.ordering === '-content_len' ? '↓' : '↑' }}
       </button>
+      
+      <!-- 浏览量排序 -->
       <button 
         :class="{ active: params.ordering.includes('views') }"
         @click="setOrdering('views')"
@@ -156,7 +161,8 @@ onMounted(() => {
         
         <div class="post-footer">
           <span>👁 {{ post.views || 0 }}</span>
-          <span>📝 {{ post.content_length || 0 }} 字</span>
+          <!-- ✅ 显示长度：改为 content_len -->
+          <span>📝 {{ post.content_len || post.content?.length || 0 }} 字</span>
         </div>
       </div>
     </div>
@@ -164,7 +170,7 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* 样式不变，和之前一样 */
+/* 样式不变 */
 .home {
   max-width: 800px;
   margin: 0 auto;

@@ -25,14 +25,37 @@ async function handleRegister() {
   error.value = ''
   
   try {
-    await userStore.register({
+    console.log('发送注册请求:', {
       username: form.value.username,
       password: form.value.password
     })
+    
+    const res = await userStore.register({
+      username: form.value.username,
+      password: form.value.password
+    })
+    
+    console.log('注册成功响应:', res)
     alert('注册成功，请登录')
     router.push('/login')
   } catch (err) {
-    error.value = err.response?.data?.message || err.response?.data?.username?.[0] || '注册失败'
+    console.error('===== 注册错误 =====')
+    console.error('错误对象:', err)
+    console.error('错误响应:', err.response)
+    console.error('错误数据:', err.response?.data)
+    console.error('状态码:', err.response?.status)
+    console.error('====================')
+    
+    const data = err.response?.data
+    if (typeof data === 'string') {
+      error.value = data
+    } else {
+      error.value = data?.message || 
+                   data?.username?.[0] || 
+                   data?.password?.[0] || 
+                   JSON.stringify(data) || 
+                   '注册失败'
+    }
   } finally {
     loading.value = false
   }
