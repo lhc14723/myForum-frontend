@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     }
   }
   
-  // ✅ 修复：去掉 email，只传 username 和 password
+ 
   async function register({ username, password }) {
     const res = await request.post('/auth/register/', { 
       username, 

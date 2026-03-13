@@ -1,27 +1,27 @@
 import axios from 'axios'
 
 const request = axios.create({
-  baseURL: '/api',  // Django 地址
+  baseURL: '/api',  
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: true  // ✅ 关键：允许携带 Cookie（sessionid）
+  withCredentials: true  
 })
 
-// 请求拦截器：添加 Basic Auth 头（如果有用户名密码）
+
 request.interceptors.request.use(config => {
   const credentials = localStorage.getItem('credentials')
   if (credentials) {
     const { username, password } = JSON.parse(credentials)
-    // Basic Auth: base64(username:password)
+   
     const token = btoa(`${username}:${password}`)
     config.headers.Authorization = `Basic ${token}`
   }
   return config
 })
 
-// 响应拦截器：处理 401 未授权
+
 request.interceptors.response.use(
   response => response.data,
   error => {

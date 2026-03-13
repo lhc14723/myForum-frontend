@@ -11,11 +11,11 @@ const form = ref({
   board: ''
 })
 
-const boards = ref([])  // 从后端获取
+const boards = ref([])  
 const loading = ref(false)
 const error = ref('')
 
-// 获取分区列表
+
 async function fetchBoards() {
   try {
     const res = await request.get('/boards/')
@@ -49,7 +49,7 @@ async function handleSubmit() {
   }
 }
 
-onMounted(fetchBoards)  // 页面加载时获取分区
+onMounted(fetchBoards)  
 </script>
 
 <template>

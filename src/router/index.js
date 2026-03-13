@@ -38,7 +38,7 @@ const router = createRouter({
   ]
 })
 
-// 路由守卫
+
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
